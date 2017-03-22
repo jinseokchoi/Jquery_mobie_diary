@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>My Information</title>
+
+<!-- jQuery mobile, jQuery library, Phonegag library file -->
+<link rel="stylesheet" href="http://code.jquery.com/mobile/1.0/jquery.mobile-1.0.min.css" />
+<script src="http://code.jquery.com/jquery-1.6.4.min.js"></script>
+<script src="http://code.jquery.com/mobile/1.0/jquery.mobile-1.0.min.js"></script>
+    
+<!--Google map API library file-->
+<script src = "http://maps.google.com/maps/api/js?sensor=true&language=ko"></script>
+    
+<!--jquery-ui-map plugin library file-->
+<script src= "ui/min/jquery.ui.map.full.min.js"></script>
+<script src= "ui/jquery.ui.map.extensions.js"></script>
+
+<script src="classdb.js"></script>
+<script src="diarydb.js"></script>
+<script src="diarylist.js"></script>
+<script src="photoHandle.js"></script>
+<script src="Camera.js"></script>
+<script src="cordova.js"></script>
+    
+<!--Class-->
+<script>
+    $(document).ready(function(){
+        //DB Connect
+        initPhoneGap();
+        openDB();
+        createTable();
+        
+        function initPhoneGap(){
+            document.addEventListener('deviceready', onDeviceReady, true);
+        }
+        
+        function onDeviceReady(){
+            navigator.notification.alert('ready device', null, 'PhoneGap API');
+        }
+        
+        //Event Handler
+        $('#class_insert_submit').click(function(){
+            insert_class();
+        });
+        
+        $('#class_insert_cancel').click(function(){
+            $('#class_insert_subject').val('교양').attr('selected', 'selected');
+            $('#class_insert_subject').selectmenu('refresh');
+            $('#class_insert_score').val('P/NP').attr('selected', 'selected');
+            $('#class_insert_score').selectmenu('refresh');
+        });
+        
+        $('#class_modify_search').click(function(){
+            var name = $('#class_modify_sname').val();
+            msearch_class(name);
+        });
+        
+        $('#class_modify_modify').click(function(){
+            modify_class();
+        });
+        
+        $('#class_modify_cancel').click(function(){
+            $('#class_modify_subject').val('교양').attr('selected', 'selected');
+            $('#class_modify_subject').selectmenu('refresh');
+            $('#class_modify_score').val('P/NP').attr('selected', 'selected');
+            $('#class_modify_score').selectmenu('refresh');
+        });
+        
+        $('#class_delete_search').click(function(){
+            var name = $('#class_delete_sname').val();
+            dsearch_class(name);
+        });
+        
+        $('#class_delete_delete').click(function(){
+            delete_class();
+        });
+        
+        $('#class_search_search').click(function(){
+            var name = $('#class_search_sname').val();
+            ssearch_class(name);
+        });
+        
+        $('#class_search_cancel').click(function(){
+            $('#class_search_sname').val('');
+            $('#class_search_subject').val('');
+            $('#class_search_score').val('');
+            $('#class_search_name').val('');
+            $('#class_search_professor').val('');
+            $('#class_search_textbook').val('');
+            $('#class_search_time').val('');
+        });
+        
+        $('#first').click(function(){
+            position = 'first';
+            search_class();
+        });
+        
+        $('#prev').click(function(){
+            position = 'prev';
+            search_class();
+        });
+        
+        $('#next').click(function(){
+            position = 'next';
+            search_class();
+        });
+        
+        $('#last').click(function(){
+            position = 'last';
+            search_class();
+        });
+    }); 
+</script>
+
+<!--diary-->
+<script>
+    var db = null; //DB variable
+    var recordSet = null; //present recordset
+    var varPosition = null; //present record
+    var flag; //input, modify page notification
+    
+    $(document).ready(function(){
+        //DB Connect
+        initPhoneGap();
+        openDB2();
+        createTable2();
+
+        function initPhoneGap(){
+            document.addEventListener('deviceready', onDeviceReady, true);
+        }
+
+        function onDeviceReady(){
+            navigator.notification.alert('ready device', null, 'PhoneGap API');
+        }
+
+        //Event Handler
+        $('#write_diary_submit').click(function(){
+            insert_diary();
+        });
+
+        $('#write_diary_cancel').click(function(){
+            $('#write_diary_day').val('Mon').attr('selected', 'selected');
+            $('#write_diary_day').selectmenu('refresh');
+            $('#write_diary_weather').val('Sunny').attr('selected', 'selected');
+            $('#write_diary_weather').selectmenu('refresh');
+        });
+
+        $('#modify_diary_search').click(function(){
+            var date = $('#modify_diary_sdate').val();
+            smodify_diary(date);
+        });
+
+        $('#modify_diary_modify').click(function(){
+            modify_diary();
+        });
+
+        $('#modify_diary_cancel').click(function(){
+            $('#modify_diary_day').val('Mon').attr('selected', 'selected');
+            $('#modify_diary_day').selectmenu('refresh');
+            $('#modify_diary_weather').val('Sunny').attr('selected', 'selected');
+            $('#modify_diary_weather').selectmenu('refresh');
+        });
+        
+        $('#delete_diary_search').click(function(){
+            var date = $('#delete_diary_sdate').val();
+            sdelete_diary(date);
+        });
+
+        $('#delete_diary_delete').click(function(){
+            delete_diary();
+        });
+
+        $('#search_diary_sbutton').click(function(){
+            search_diary();
+        });
+
+        $('#write_diary_takepic').click(function(){
+            if($('#write_diary_pic').val() == ''){
+                navigator.notification.alert('Input photo name first', null, 'input Error');
+            }
+            else{
+                flag = 'enrol';
+                capturePhoto();
+            }
+        });
+
+        $('#modify_diary_takepic').click(function(){
+            if($('#modify_diary_pic').val() == ''){
+                navigator.notification.alert('Input photo name first', null, 'input Error');
+            }
+            else{
+                flag = 'modify';
+                capturePhoto('change');
+            }
+        });
+
+        $('#show_photo').click(function(){
+            getDiaryPhoto();
+        });
+
+        $('#show_map').click(function(){
+            getDiaryMap();
+        });
+
+        $('#show_route').click(function(){
+            getDiaryRouteMap();
+        });      
+    });
+</script>
+    
+<!--Camera-->
+<script>
+	$(document).ready(function() {
+		initPhoneGap();
+		$('#TakePhoto').click(function() {
+			takePhoto();
+		});
+		$('#GetPhoto').click(function() {
+			getPhoto();
+		});								
+	});	
+   function initPhoneGap() {
+ 		document.addEventListener('deviceready', onDeviceReady, true);
+	}   
+   function onDeviceReady() {
+		navigator.notification.alert('device ready', null, '폰갭 API');
+	}	
+</script> 
+</head>
+<body>
+    
+<!--Main-->
+    <div data-role="page" id="main" data-add-back-btn="true">
+        <div data-role="header" data-backbtn="false" data-position="fixed" data-theme="b">
+            <h1>Information</h1>
+        </div>
+        
+        <div data-role="content">
+            <h2>My Information</h2>
+            <ul data-role="listview" data-inset="true">
+                <li><a href="#dialog_name" data-rel="dialog" >Name</a></li>
+                <li><a href="tel:010-9117-7500" target="_blank">Phone Number</a></li>
+                <li><a href="mailto:wlstjr4639@naver.com">Mail</a></li>
+                <li><a href="https://www.google.co.kr/maps/search/%EA%B2%BD%EA%B8%B0%EB%8F%84+%EC%95%88%EC%82%B0%EC%8B%9C+%EC%83%81%EB%A1%9D%EA%B5%AC+%EC%9B%94%ED%94%BC%EB%8F%99+%ED%98%84%EB%8C%80%EC%95%84%ED%8C%8C%ED%8A%B8/@37.331746,126.8470361,17z/data=!3m1!4b1" target="_blank">Address</a></li>
+            </ul>
+        </div>
+        
+        <div data-role="footer" class="ui-bar" data-position="fixed" data-theme="b">
+            <div data-role="controlgroup" >
+                <a href="#class" data-transition="flip">Class</a>
+                <a href="#diary" data-transition="flip">Diary</a>
+                <a href="#camera" data-transition="flip">Camera</a>
+            </div>
+        </div>
+    </div>
+    
+<!--Name dialog-->
+    <div data-role="page" id="dialog_name" data-position="fixed">
+        <div data-role="header" data-theme="b">
+            <h1>Name</h1>
+        </div>
+        
+        <div data-role="content">
+            <a href="#" data-role="button">최 진석</a>
+            <a href="#" data-role="button">Choi jinseok</a>
+            <a href="#" data-role="button">崔珍碩</a>
+        </div>
+    </div>
+    
+<!--Class-->
+    <div data-role="page" id="class" data-add-back-btn="true">
+        <div data-role="header" data-backbtn="false" data-position="fixed" data-theme="b">
+            <h1>Class</h1>
+            <a href="index.html" class="ui-btn-right" data-icon="home" data-iconpos="notext"></a>
+        </div>
+        
+        <div data-role="content">
+            <img src="class.jpg">
+            <ul data-role="listview" data-inset="true">
+                <li><a href="#class_insert">Class Insert</a></li>
+                <li><a href="#class_modify">Class Modify</a></li>
+                <li><a href="#class_delete">Class Delete</a></li>
+                <li><a href="#class_search">Class Search</a></li>
+            </ul>
+        </div>
+        
+        <div data-role="footer" class="ui-bar" data-position="fixed" data-theme="b">
+            <div data-role="controlgroup" >
+                <a href="#class" data-transition="flip">Class</a>
+                <a href="#diary" data-transition="flip">Diary</a>
+                <a href="#camera" data-transition="flip">Camera</a>
+            </div>
+        </div>
+    </div>
+    
+<!--Class Insert-->
+    <div data-role="page" id="class_insert" data-add-back-btn="true">
+        <div data-role="header" data-backbtn="false" data-position="fixed" data-theme="b">
+            <h1>Class Insert</h1>
+            <a href="index.html" class="ui-btn-right" data-icon="home" data-iconpos="notext"></a>
+            <div data-role="navbar">
+                <ul>
+                    <li><a href="#class_insert">Insert</a></li>
+                    <li><a href="#class_modify">Modify</a></li>
+                    <li><a href="#class_delete">Delete</a></li>
+                    <li><a href="#class_search">Search</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div data-role="content">
+            <form name="f_class_insert">
+                <h3>Insert View</h3>
+                <div class="ui-body ui-body-b gap">
+                    <label for="class_insert_subject" class="select">과목구분</label>
+                    <select name="class_insert_subject" id="class_insert_subject" data-native-menu="false" data-mini="true" data-inline="true">
+                        <option value="교양선택">교양</option>
+                        <option value="전공선택">전공</option>
+                    </select>
+                    
+                    <label for="class_insert_score" class="select">학점</label>
+                    <select name="class_insert_score" id="class_insert_score" data-native-menu="false" data-mini="true" data-inline="true">
+                        <option value="P/NP">P/NP</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                    </select>
+                    
+                    <label for="class_insert_name">과목명</label>
+                    <input type="text" name="class_insert_name" id="class_insert_name" value="" data-mini="true">
+                    
+                    <label for="class_insert_professor">교수명</label>
+                    <input type="text" name="class_insert_professor" id="class_insert_professor" value="" data-mini="true">
+                    
+                    <label for="class_insert_textbook">교재명</label>
+                    <input type="text" name="class_insert_textbook" id="class_insert_textbook" value="" data-mini="true">
+                    
+                    <label for="class_insert_time">강의시간</label>
+                    <input type="text" name="class_insert_time" id="class_insert_time" value="" data-mini="true">
+                </div>
+                
+                <div class="ui-body">
+                    <fieldset class="ui-grid-a">
+                        <div class="ui-block-a">
+                            <input type="button" id="class_insert_submit" value="Submit">
+                        </div>
+                        <div class="ui-block-b">
+                            <input type="reset" id="class_insert_cancel" value="Cancel">
+                        </div>
+                    </fieldset>
+                </div>
+            </form>
+        </div>
+        
+        <div data-role="footer" class="ui-bar" data-position="fixed" data-theme="b">
+            <div data-role="controlgroup" >
+                <a href="#class" data-transition="flip">Class</a>
+                <a href="#diary" data-transition="flip">Diary</a>
+                <a href="#camera" data-transition="flip">Camera</a>
+            </div>
+        </div>
+    </div>
+    
+<!--Class Modify-->
+    <div data-role="page" id="class_modify" data-add-back-btn="true">
+        <div data-role="header" data-backbtn="false" data-position="fixed" data-theme="b">
+            <h1>Class Modify</h1>
+            <a href="index.html" class="ui-btn-right" data-icon="home" data-iconpos="notext"></a>
+            <div data-role="navbar">
+                <ul>
+                    <li><a href="#class_insert">Insert</a></li>
+                    <li><a href="#class_modify">Modify</a></li>
+                    <li><a href="#class_delete">Delete</a></li>
+                    <li><a href="#class_search">Search</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div data-role="content">
+            <form name="f_class_modify">
+                <h3>Modify View</h3>
+                <div class="ui-body ui-body-b gap">
+                    <label for="class_modify_sname">과목명 검색</label>
+                    <input type="search" name="class_modify_sname" id="class_modify_sname" value="" data-mini="true">
+                    
+                    <label for="class_modify_subject" class="select">과목구분</label>
+                    <select name="class_modify_subject" id="class_modify_subject" data-native-menu="false" data-mini="true" data-inline="true">
+                        <option value="교양선택">교양</option>
+                        <option value="전공선택">전공</option>
+                    </select>
+                    
+                    <label for="class_modify_score" class="select">학점</label>
+                    <select name="class_modify_score" id="class_modify_score" data-native-menu="false" data-mini="true" data-inline="true">
+                        <option value="P/NP">P/NP</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                    </select>
+                    
+                    <label for="class_modify_name">과목명</label>
+                    <input type="text" name="class_modify_name" id="class_modify_name" value="" data-mini="true">
+                    
+                    <label for="class_modify_professor">교수명</label>
+                    <input type="text" name="class_modify_professor" id="class_modify_professor" value="" data-mini="true">
+                    
+                    <label for="class_modify_textbook">교재명</label>
+                    <input type="text" name="class_modify_textbook" id="class_modify_textbook" value="" data-mini="true">
+                    
+                    <label for="class_modify_time">강의시간</label>
+                    <input type="text" name="class_modify_time" id="class_modify_time" value="" data-mini="true">
+                </div>
+                
+                <div class="ui-body">
+                    <fieldset class="ui-grid-b">
+                        <div class="ui-block-a">
+                            <input type="button" id="class_modify_search" value="Search">
+                        </div>
+                        <div class="ui-block-b">
+                            <input type="button" id="class_modify_modify" value="Modify">
+                        </div>
+                        <div class="ui-block-c">
+                            <input type="reset" id="class_modify_cancel" value="Cancel">
+                        </div>
+                    </fieldset>
+                </div>
+            </form>
+        </div>
+        
+        <div data-role="footer" class="ui-bar" data-position="fixed" data-theme="b">
+            <div data-role="controlgroup" >
+                <a href="#class" data-transition="flip">Class</a>
+                <a href="#diary" data-transition="flip">Diary</a>
+                <a href="#camera" data-transition="flip">Camera</a>
+            </div>
+        </div>
+    </div>
+    
+<!--Class Delete-->
+    <div data-role="page" id="class_delete" data-add-back-btn="true">
+        <div data-role="header" data-backbtn="false" data-position="fixed" data-theme="b">
+            <h1>Class Delete</h1>
+            <a href="index.html" class="ui-btn-right" data-icon="home" data-iconpos="notext"></a>
+            <div data-role="navbar">
+                <ul>
+                    <li><a href="#class_insert">Insert</a></li>
+                    <li><a href="#class_modify">Modify</a></li>
+                    <li><a href="#class_delete">Delete</a></li>
+                    <li><a href="#class_search">Search</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div data-role="content">
+            <form name="f_class_modify">
+                <h3>Delete View</h3>
+                <div class="ui-body ui-body-b gap">
+                    <label for="class_delete_sname">과목명 검색</label>
+                    <input type="search" name="class_delete_sname" id="class_delete_sname" value="" data-mini="true">
+                    
+                    <label for="class_delete_subject">과목구분</label>
+                    <input type="text" name="class_delete_subject" id="class_delete_subject" value="" data-mini="true">
+                    
+                    <label for="class_delete_score">학점</label>
+                    <input type="text" name="class_delete_score" id="class_delete_score" value="" data-mini="true">
+                    
+                    <label for="class_delete_name">과목명</label>
+                    <input type="text" name="class_delete_name" id="class_delete_name" value="" data-mini="true">
+                    
+                    <label for="class_delete_professor">교수명</label>
+                    <input type="text" name="class_delete_professor" id="class_delete_professor" value="" data-mini="true">
+                    
+                    <label for="class_delete_textbook">교재명</label>
+                    <input type="text" name="class_delete_textbook" id="class_delete_textbook" value="" data-mini="true">
+                    
+                    <label for="class_delete_time">강의시간</label>
+                    <input type="text" name="class_delete_time" id="class_delete_time" value="" data-mini="true">
+                </div>
+                
+                <div class="ui-body">
+                    <fieldset class="ui-grid-b">
+                        <div class="ui-block-a">
+                            <input type="button" id="class_delete_search" value="Search">
+                        </div>
+                        <div class="ui-block-b">
+                            <input type="button" id="class_delete_delete" value="Delete">
+                        </div>
+                        <div class="ui-block-c">
+                            <input type="reset" id="class_delete_cancel" value="Cancel">
+                        </div>
+                    </fieldset>
+                </div>
+            </form>
+        </div>
+        
+        <div data-role="footer" class="ui-bar" data-position="fixed" data-theme="b">
+            <div data-role="controlgroup" >
+                <a href="#class" data-transition="flip">Class</a>
+                <a href="#diary" data-transition="flip">Diary</a>
+                <a href="#camera" data-transition="flip">Camera</a>
+            </div>
+        </div>
+    </div>
+    
+<!--Class Search-->
+    <div data-role="page" id="class_search" data-add-back-btn="true">
+        <div data-role="header" data-backbtn="false" data-position="fixed" data-theme="b">
+            <h1>Class Search</h1>
+            <a href="index.html" class="ui-btn-right" data-icon="home" data-iconpos="notext"></a>
+            <div data-role="navbar">
+                <ul>
+                    <li><a href="#class_insert">Insert</a></li>
+                    <li><a href="#class_modify">Modify</a></li>
+                    <li><a href="#class_delete">Delete</a></li>
+                    <li><a href="#class_search">Search</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div data-role="content">
+            <form name="f_class_search">
+                <h3>Search View</h3>
+                <div class="ui-body ui-body-b gap">
+                    <fieldset data-role="controlgroup" data-type="horizontal" style="text-align:right">
+            		<input type="button" id="first" value="|<"/>
+	                <input type="button" id="prev" value="<"/>
+        	        <input type="button" id="next" value=">"/>
+                	<input type="button" id="last" value=">|"/>
+                    </fieldset>
+                    
+                    <label for="class_search_sname">과목명 검색</label>
+                    <input type="search" name="class_search_sname" id="class_search_sname" value="" data-mini="true">
+                    
+                    <label for="class_search_subject">과목구분</label>
+                    <input type="text" name="class_search_subject" id="class_search_subject" value="" data-mini="true">
+                    
+                    <label for="class_search_score">학점</label>
+                    <input type="text" name="class_search_score" id="class_search_score" value="" data-mini="true">
+                    
+                    <label for="class_search_name">과목명</label>
+                    <input type="text" name="class_search_name" id="class_search_name" value="" data-mini="true">
+                    
+                    <label for="class_search_professor">교수명</label>
+                    <input type="text" name="class_search_professor" id="class_search_professor" value="" data-mini="true">
+                    
+                    <label for="class_search_textbook">교재명</label>
+                    <input type="text" name="class_search_textbook" id="class_search_textbook" value="" data-mini="true">
+                    
+                    <label for="class_search_time">강의시간</label>
+                    <input type="text" name="class_search_time" id="class_search_time" value="" data-mini="true">
+                </div>
+                
+                <div class="ui-body">
+                    <fieldset class="ui-grid-a">
+                        <div class="ui-block-a">
+                            <input type="button" id="class_search_search" value="Search">
+                        </div>
+                        <div class="ui-block-b">
+                            <input type="button" id="class_search_cancel" value="Cancel">
+                        </div>
+                    </fieldset>
+                </div>
+            </form>
+        </div>
+        
+        <div data-role="footer" class="ui-bar" data-position="fixed" data-theme="b">
+            <div data-role="controlgroup" >
+                <a href="#class" data-transition="flip">Class</a>
+                <a href="#diary" data-transition="flip">Diary</a>
+                <a href="#camera" data-transition="flip">Camera</a>
+            </div>
+        </div>
+    </div>
+
+<!--Diary-->
+    <div data-role="page" id="diary">
+        <div data-role="header" data-backbtn="false" data-position="fixed" data-theme="b">
+            <h1>Diary</h1>
+            <a href="index.html" class="ui-btn-right" data-icon="home" data-iconpos="notext"></a>
+        </div>
+        
+        <div data-role="content">
+            <img src = "diary.jpg">
+            <ul data-role="listview" data-inset="true">
+                <li><a href="#write_diary">Diary Write</a></li>
+                <li><a href="#modify_diary">Diary Modify</a></li>
+                <li><a href="#delete_diary">Diary Delete</a></li>
+                <li><a href="#search_diary">Diary Search</a></li>
+            </ul>
+        </div>
+        
+        <div data-role="footer" class="ui-bar" data-position="fixed" data-theme="b">
+            <div data-role="controlgroup" >
+                <a href="#class" data-transition="flip">Class</a>
+                <a href="#diary" data-transition="flip">Diary</a>
+                <a href="#camera" data-transition="flip">Camera</a>
+            </div>
+        </div>
+    </div>
+    
+<!--Diary Write-->
+    <div data-role="page" id="write_diary">
+        <div data-role="header" data-backbtn="false" data-position="fixed" data-theme="b">
+            <h1>Diary</h1>
+            <a href="index.html" class="ui-btn-right" data-icon="home" data-iconpos="notext"></a>
+            <div data-role="navbar">
+                <ul>
+                    <li><a href="#write_diary">Write</a></li>
+                    <li><a href="#modify_diary">Modify</a></li>
+                    <li><a href="#delete_diary">Delete</a></li>
+                    <li><a href="#search_diary">Search</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div data-role="content">
+            <form name="f_write_diary">
+                <h3>Write Diary</h3>
+                <div class="ui-body ui-body-b">
+                    <label for="write_diary_date">Date</label>
+                    <input type="text" name="write_diary_date" id="write_diary_date" value="" data-mini="true" placeholder="12-34-56">
+                    <div class="ui-block-a">
+                        <label for="write_diary_day" class="select">Day</label>
+                        <select name="write_diary_day" id="write_diary_day" data-native-menu="false" data-mini="true" data-inline="true">
+                            <option value="Monday">Mon</option>
+                            <option value="Tuesday">Tue</option>
+                            <option value="Wednesday">Wed</option>
+                            <option value="Thursday">Thu</option>
+                            <option value="Firday">Fir</option>
+                            <option value="Saturday">Sat</option>
+                            <option value="Sunday">Sun</option>
+                        </select>
+                    </div>
+                    
+                    <div class="ui-block-b">
+                        <label for="write_diary_weather" class="select">Weather</label>
+                        <select name="write_diary_weather" id="write_diary_weather" data-native-menu="false" data-mini="true" data-inline="true">
+                            <option value="Sunny">Sunny</option>
+                            <option value="Cloudy">Cloudy</option>
+                            <option value="Rainy">Rainy</option>
+                            <option value="Snowy">Snowy</option>
+                            <option value="Windy">Windy</option>
+                            <option value="Stormy">Stormy</option>
+                            <option value="Foggy">Foggy</option>
+                        </select>
+                    </div><br><br><br><br><br>
+                    
+                    <label for="write_diary_title">Title</label>
+                    <input type="text" name="write_diary_title" id="write_diary_title" value="" data-mini="true">
+                    
+                    <label for="write_diary_content">Content</label>
+                    <input type="text" name="write_diary_content" id="write_diary_content" value="" data-mini="true">
+                    
+                    <label for="write_diary_location">Location</label>
+                    <input type="text" name="write_diary_location" id="write_diary_location" value="" data-mini="true">
+                    
+                    <label for="write_diary_photo">Photo</label>
+                    <input type="text" name="write_diary_pic" id="write_diary_photo" value="" data-mini="true">
+                    <input type="button" name="write_diary_takepic" id="write_diary_takepic" value="Take a picture" data-mini="true">
+                </div>
+                <div class="ui-body">
+                    <fieldset class="ui-grid-a">
+                        <div class="ui-block-a">
+                            <input type="button" id="write_diary_submit" value="Submit">
+                        </div>
+                        <div class="ui-block-b">
+                            <input type="reset" id="write_diary_cancel" value="Cancel">
+                        </div>
+                    </fieldset>
+                </div>
+            </form>
+        </div>
+        
+        <div data-role="footer" class="ui-bar" data-position="fixed" data-theme="b">
+            <div data-role="controlgroup" >
+                <a href="#class" data-transition="flip">Class</a>
+                <a href="#diary" data-transition="flip">Diary</a>
+                <a href="#camera" data-transition="flip">Camera</a>
+            </div>
+        </div>
+    </div>
+    
+<!--Diary Modify-->
+    <div data-role="page" id="modify_diary">
+        <div data-role="header" data-backbtn="false" data-position="fixed" data-theme="b">
+            <h1>Diary</h1>
+            <a href="index.html" class="ui-btn-right" data-icon="home" data-iconpos="notext"></a>
+            <div data-role="navbar">
+                <ul>
+                    <li><a href="#write_diary">Write</a></li>
+                    <li><a href="#modify_diary">Modify</a></li>
+                    <li><a href="#delete_diary">Delete</a></li>
+                    <li><a href="#search_diary">Search</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div data-role="content">
+            <form name="f_modify_diary">
+                <h3>modify Diary</h3>
+                <div class="ui-body ui-body-b">
+                    <label for="modify_diary_sdate">Search Date</label>
+                    <input type="search" name="modify_diary_sdate" id="modify_diary_sdate" value="" data-mini="true" placeholder="12-34-56">
+                    <label for="modify_diary_date">Date</label>
+                    <input type="text" name="modify_diary_date" id="modify_diary_date" value="" data-mini="true">
+                    <div class="ui-block-a">
+                        <label for="modify_diary_day" class="select">Day</label>
+                        <select name="modify_diary_day" id="modify_diary_day" data-native-menu="false" data-mini="true" data-inline="true">
+                            <option value="Monday">Mon</option>
+                            <option value="Tuesday">Tue</option>
+                            <option value="Wednesday">Wed</option>
+                            <option value="Thursday">Thu</option>
+                            <option value="Firday">Fir</option>
+                            <option value="Saturday">Sat</option>
+                            <option value="Sunday">Sun</option>
+                        </select>
+                    </div>
+                    
+                    <div class="ui-block-b">
+                        <label for="modify_diary_weather" class="select">Weather</label>
+                        <select name="modify_diary_weather" id="modify_diary_weather" data-native-menu="false" data-mini="true" data-inline="true">
+                            <option value="Sunny">Sunny</option>
+                            <option value="Cloudy">Cloudy</option>
+                            <option value="Rainy">Rainy</option>
+                            <option value="Snowy">Snowy</option>
+                            <option value="Windy">Windy</option>
+                            <option value="Stormy">Stormy</option>
+                            <option value="Foggy">Foggy</option>
+                        </select>
+                    </div><br><br><br><br><br>
+                    
+                    <label for="modify_diary_title">Title</label>
+                    <input type="text" name="modify_diary_title" id="modify_diary_title" value="" data-mini="true">
+                    
+                    <label for="modify_diary_content">Content</label>
+                    <input type="text" name="modify_diary_content" id="modify_diary_content" value="" data-mini="true">
+                    
+                    <label for="modify_diary_location">Location</label>
+                    <input type="text" name="modify_diary_location" id="modify_diary_location" value="" data-mini="true">
+                    
+                    <label for="modify_diary_photo">Photo</label>
+                    <input type="text" name="modify_diary_pic" id="modify_diary_photo" value="" data-mini="true">
+                    <input type="button" name="modify_diary_takepic" id="modify_diary_takepic" value="Take a picture" data-mini="true">
+                </div>
+                <div class="ui-body">
+                    <fieldset class="ui-grid-b">
+                        <div class="ui-block-a">
+                            <input type="button" id="modify_diary_search" value="Search">
+                        </div>
+                        <div class="ui-block-b">
+                            <input type="button" id="modify_diary_modify" value="Modify">
+                        </div>
+                        <div class="ui-block-c">
+                            <input type="reset" id="modify_diary_cancel" value="Cancel">
+                        </div>
+                    </fieldset>
+                </div>
+            </form>
+        </div>
+        
+        <div data-role="footer" class="ui-bar" data-position="fixed" data-theme="b">
+            <div data-role="controlgroup" >
+                <a href="#class" data-transition="flip">Class</a>
+                <a href="#diary" data-transition="flip">Diary</a>
+                <a href="#camera" data-transition="flip">Camera</a>
+            </div>
+        </div>
+    </div>
+
+<!--Diary Delete-->
+    <div data-role="page" id="delete_diary">
+        <div data-role="header" data-backbtn="false" data-position="fixed" data-theme="b">
+            <h1>Diary</h1>
+            <a href="index.html" class="ui-btn-right" data-icon="home" data-iconpos="notext"></a>
+            <div data-role="navbar">
+                <ul>
+                    <li><a href="#write_diary">Write</a></li>
+                    <li><a href="#modify_diary">Modify</a></li>
+                    <li><a href="#delete_diary">Delete</a></li>
+                    <li><a href="#search_diary">Search</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div data-role="content">
+            <form name="f_delete_diary">
+                <h3>delete Diary</h3>
+                <div class="ui-body ui-body-b">
+                    <label for="delete_diary_sdate">Search Date</label>
+                    <input type="search" name="delete_diary_sdate" id="delete_diary_sdate" value="" data-mini="true" placeholder="12-34-56">
+                    <label for="delete_diary_date">Date</label>
+                    <input type="text" name="delete_diary_date" id="delete_diary_date" value="" data-mini="true">
+                    <div class="ui-block-a">
+                        <label for="delete_diary_day" class="select">Day</label>
+                        <select name="delete_diary_day" id="delete_diary_day" data-native-menu="false" data-mini="true" data-inline="true">
+                            <option value="Monday">Mon</option>
+                            <option value="Tuesday">Tue</option>
+                            <option value="Wednesday">Wed</option>
+                            <option value="Thursday">Thu</option>
+                            <option value="Firday">Fir</option>
+                            <option value="Saturday">Sat</option>
+                            <option value="Sunday">Sun</option>
+                        </select>
+                    </div>
+                    
+                    <div class="ui-block-b">
+                        <label for="delete_diary_weather" class="select">Weather</label>
+                        <select name="delete_diary_weather" id="delete_diary_weather" data-native-menu="false" data-mini="true" data-inline="true">
+                            <option value="Sunny">Sunny</option>
+                            <option value="Cloudy">Cloudy</option>
+                            <option value="Rainy">Rainy</option>
+                            <option value="Snowy">Snowy</option>
+                            <option value="Windy">Windy</option>
+                            <option value="Stormy">Stormy</option>
+                            <option value="Foggy">Foggy</option>
+                        </select>
+                    </div><br><br><br><br><br>
+                    
+                    <label for="delete_diary_title">Title</label>
+                    <input type="text" name="delete_diary_title" id="delete_diary_title" value="" data-mini="true">
+                    
+                    <label for="delete_diary_content">Content</label>
+                    <input type="text" name="delete_diary_content" id="delete_diary_content" value="" data-mini="true">
+                    
+                    <label for="delete_diary_location">Location</label>
+                    <input type="text" name="delete_diary_location" id="delete_diary_location" value="" data-mini="true">
+                </div>
+                
+                <div class="ui-body">
+                    <fieldset class="ui-grid-b">
+                        <div class="ui-block-a">
+                            <input type="button" id="delete_diary_search" value="Search">
+                        </div>
+                        <div class="ui-block-b">
+                            <input type="button" id="delete_diary_delete" value="delete">
+                        </div>
+                        <div class="ui-block-c">
+                            <input type="reset" id="delete_diary_cancel" value="Cancel">
+                        </div>
+                    </fieldset>
+                </div>
+            </form>
+        </div>
+        
+        <div data-role="footer" class="ui-bar" data-position="fixed" data-theme="b">
+            <div data-role="controlgroup" >
+                <a href="#class" data-transition="flip">Class</a>
+                <a href="#diary" data-transition="flip">Diary</a>
+                <a href="#camera" data-transition="flip">Camera</a>
+            </div>
+        </div>
+    </div>
+    
+<!--Diary Search-->
+    <div data-role="page" id="search_diary">
+        <div data-role="header" data-backbtn="false" data-position="fixed" data-theme="b">
+            <h1>Diary</h1>
+            <a href="index.html" class="ui-btn-right" data-icon="home" data-iconpos="notext"></a>
+            <div data-role="navbar">
+                <ul>
+                    <li><a href="#write_diary">Write</a></li>
+                    <li><a href="#modify_diary">Modify</a></li>
+                    <li><a href="#delete_diary">Delete</a></li>
+                    <li><a href="#search_diary">Search</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div data-role="content">
+            <form name="f_search_diary">
+                <h3>Search Diary</h3>
+                <div class="ui-body ui-body-b">
+                    <div class="ui-block-a">
+                        <label for="search_diary_sdate">Search Date</label>
+                        <input type="search" name="search_diary_sdate" id="search_diary_sdate" value="" data-mini="true" placeholder="12-34-56">
+                    </div>
+                    <div class="ui-block-b">
+                        <label for="search_diary_sday" class="select">Day</label>
+                        <select name="search_diary_sday" id="search_diary_sday" data-native-menu="false" data-mini="true" data-inline="true">
+                            <option value="Monday">Mon</option>
+                            <option value="Tuesday">Tue</option>
+                            <option value="Wednesday">Wed</option>
+                            <option value="Thursday">Thu</option>
+                            <option value="Firday">Fir</option>
+                            <option value="Saturday">Sat</option>
+                            <option value="Sunday">Sun</option>
+                        </select>
+                    </div><br>
+                    <div class="ui-block-c">
+                        <input type="button" id="search_diary_sbutton" value="List search" data-mini="true" data-inline="true">
+                    </div>
+                </div>
+            </form>
+            
+            <ul div data-role="listview" id="search_list" data-divider-theme="b" data-inset="true">
+                <!--Diary list view-->
+            </ul>
+        </div>
+        
+        <div data-role="footer" class="ui-bar" data-position="fixed" data-theme="b">
+            <div data-role="controlgroup" >
+                <a href="#class" data-transition="flip">Class</a>
+                <a href="#diary" data-transition="flip">Diary</a>
+                <a href="#camera" data-transition="flip">Camera</a>
+            </div>
+        </div>
+    </div>
+    
+<!--Diary detail_view-->
+    <div data-role="page" id="detail_view_diary">
+        <div data-role="header" data-backbtn="false" data-position="fixed" data-theme="b">
+            <h1>Diary</h1>
+            <a href="index.html" class="ui-btn-right" data-icon="home" data-iconpos="notext"></a>
+            <div data-role="navbar">
+                <ul>
+                    <li><a href="#write_diary">Write</a></li>
+                    <li><a href="#modify_diary">Modify</a></li>
+                    <li><a href="#delete_diary">Delete</a></li>
+                    <li><a href="#search_diary">Search</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div data-role="content">
+            <div id="btngroup">
+                <span id="show_photo"><button data-role="none">Show Photo</button></span>
+                <span id="show_map"><button data-role="none">Show Map</button></span>
+                <span id="show_route"><button data-role="none">SHow Route</button></span>
+            </div>
+            
+            <div class="ui-body ui-body-b"><br>
+                <div id="detail_view_list">
+                    <!--Diary detail view-->
+                </div>
+            </div>
+        </div>
+        
+        <div data-role="footer" class="ui-bar" data-position="fixed" data-theme="b">
+            <div data-role="controlgroup" >
+                <a href="#class" data-transition="flip">Class</a>
+                <a href="#diary" data-transition="flip">Diary</a>
+                <a href="#camera" data-transition="flip">Camera</a>
+            </div>
+        </div>
+    </div>
+    
+<!--Show photo-->
+    <div data-role="dialog" id="dshow_photo" data-theme="b">
+        <div data-role="header" data-theme="b">
+            <h1>Photo</h1>
+        </div>
+        
+        <div data-role="content" data-theme="b">
+            <div id="photo_name" class="ui-bar ui-bar-e"></div><br>
+            <div><img id="photo_area" src=""></div>
+        </div>
+    </div>
+    
+<!--Show map-->
+    <div data-role="dialog" id="dshow_map" data-theme="b">
+        <div data-role="header" data-theme="b">
+            <h1>Map</h1>
+        </div>
+        
+        <div data-role="content" data-theme="b">
+            <div id="map_addr" class="ui-bar ui-bar-e"></div><br>
+            <div id="map_area"></div>
+        </div>
+    </div>
+
+<!--Show route-->
+    <div data-role="dialog" id="dshow_route" data-theme="b">
+        <div data-role="header" data-theme="b">
+            <h1>Route</h1>
+        </div>
+        
+        <div data-role="content" data-theme="b">
+            <div id="route_name" class="ui-bar ui-bar-e"></div><br>
+            <div id="route_area"></div>
+        </div>
+    </div>
+    
+<!--Camera-->
+     <div data-role="page" id="camera" data-add-back-btn="true">
+        <div data-role="header" data-backbtn="false" data-position="fixed" data-theme="b">
+		  <h1>Camera</h1>
+           <a href="index.html" class="ui-btn-right" data-icon="home" data-iconpos="notext"></a>
+           <div data-role="navbar">
+               <ul>
+                   <li><a id="TakePhoto">Take a picture</a></li>
+                   <li><a id="GetPhoto">Load a picture</a></li>
+			</ul>
+	       </div>	
+        </div>
+        <div data-role="content">
+            <div class="ui-bar ui-bar-e">
+                <h3>Picture List</h3>
+            </div><br/>				
+            <img id="displayArea" src=""/>	
+         </div>
+            
+         <div data-role="footer" class="ui-bar" data-position="fixed" data-theme="b">
+             <div data-role="controlgroup" >
+                 <a href="#class" data-transition="flip">Class</a>
+                 <a href="#diary" data-transition="flip">Diary</a>
+                 <a href="#camera" data-transition="flip">Camera</a>
+             </div>
+        </div>		
+    </div>	
+</body>
+</html>
